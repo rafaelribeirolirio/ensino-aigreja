@@ -2,14 +2,17 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { BookOpen, LogOut, User } from "lucide-react";
+import { BookOpen, LogOut, Settings, User } from "lucide-react";
 
+import { can } from "@/lib/authz";
 import { signOut, useSession } from "@/lib/auth-client";
 import { Button, buttonVariants } from "@/components/ui/button";
 
 export function SiteHeader() {
   const router = useRouter();
   const { data: session, isPending } = useSession();
+  const role = (session?.user as { churchRole?: string | null } | undefined)
+    ?.churchRole;
 
   async function handleSignOut() {
     await signOut();
@@ -39,6 +42,15 @@ export function SiteHeader() {
             <div className="h-9 w-24 animate-pulse rounded-md bg-neutral-200 dark:bg-neutral-800" />
           ) : session ? (
             <>
+              {can(role, "manageContent") ? (
+                <Link
+                  href="/admin"
+                  className={buttonVariants({ variant: "ghost", size: "sm" })}
+                >
+                  <Settings className="h-4 w-4" />
+                  Admin
+                </Link>
+              ) : null}
               <Link
                 href="/perfil"
                 className={buttonVariants({ variant: "ghost", size: "sm" })}

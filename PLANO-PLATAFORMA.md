@@ -21,7 +21,7 @@ Construir um **MVP enxuto e evolutivo**. Primeiro entregar o núcleo de
 aprendizado + engajamento; recompensas e integrações entram depois, sem
 retrabalho de schema (o ledger de pontos já nasce preparado para resgate).
 
-### Estado atual (Fase 0 concluída)
+### Estado atual (Fases 0 e 1 — núcleo — concluídas)
 - Next.js 16 + React 19 + TypeScript + Tailwind 4 no ar.
 - Prisma 7 com driver adapter `@prisma/adapter-pg`; schema completo do domínio
   (cursos, progresso, gamificação, fórum) + tabelas do Better Auth.
@@ -29,6 +29,12 @@ retrabalho de schema (o ledger de pontos já nasce preparado para resgate).
 - Proteção de rota em `src/proxy.ts` + checagem segura no DAL.
 - UI com primitivas próprias no estilo shadcn (Button, Input, Label, Card).
 - Banco local de dev via `npm run db:dev` (Prisma dev). Em produção, Supabase.
+- **Admin de conteúdo** em `/admin` (TEACHER/ADMIN): criar/editar/excluir
+  cursos, criar/excluir módulos e criar/excluir aulas com vídeo do YouTube.
+- **Área pública**: catálogo de cursos publicados, detalhe do curso, player de
+  aula (embed `youtube-nocookie`) e marcação de aula concluída.
+- Inscrição automática ao começar/concluir uma aula e progresso por aula.
+- Materiais/anexos: modelos prontos; UI e upload no Supabase ainda pendentes.
 
 ---
 
@@ -391,11 +397,13 @@ Avaliação via job após eventos relevantes; grava `UserBadge` (único).
 - Layout base, navegação, perfil básico.
 
 ### Fase 1 — Conteúdo
-- CRUD admin de cursos/módulos/aulas.
-- Upload de PDF/ebook/imagem no Supabase Storage (URL assinada).
-- Vídeo via **embed do YouTube não listado** (`youtube-nocookie`); guardar
-  `videoProvider` + `videoId` para permitir migração futura sem migrar dados.
-- Catálogo, player, marcação de progresso e conclusão.
+- [x] CRUD admin de cursos/módulos/aulas (TEACHER/ADMIN).
+- [x] Vídeo via **embed do YouTube não listado** (`youtube-nocookie`),
+  guardando `videoProvider` + `videoId` para migrar ao Bunny sem migrar dados.
+- [x] Catálogo público, detalhe do curso, player e marcação de progresso.
+- [ ] Upload de PDF/ebook/imagem no Supabase Storage (URL assinada).
+- [ ] Telas de anexos por aula e da biblioteca de materiais.
+- [ ] Edição de aulas e reordenação de módulos/aulas.
 
 ### Fase 2 — Gamificação
 - Ledger de pontos + eventos.
