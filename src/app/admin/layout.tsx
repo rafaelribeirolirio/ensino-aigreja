@@ -24,6 +24,12 @@ export default function AdminLayout({
             Cursos
           </Link>
           <Link
+            href="/admin/materiais"
+            className="hover:text-neutral-900 dark:hover:text-white"
+          >
+            Materiais
+          </Link>
+          <Link
             href="/cursos"
             className="hover:text-neutral-900 dark:hover:text-white"
           >

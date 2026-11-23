@@ -32,6 +32,9 @@ export function SiteHeader() {
           <Link href="/cursos" className="transition-colors hover:text-neutral-900 dark:hover:text-white">
             Cursos
           </Link>
+          <Link href="/materiais" className="transition-colors hover:text-neutral-900 dark:hover:text-white">
+            Materiais
+          </Link>
           <Link href="/forum" className="transition-colors hover:text-neutral-900 dark:hover:text-white">
             Fórum
           </Link>

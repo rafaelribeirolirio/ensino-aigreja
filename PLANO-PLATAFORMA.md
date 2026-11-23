@@ -34,7 +34,10 @@ retrabalho de schema (o ledger de pontos já nasce preparado para resgate).
 - **Área pública**: catálogo de cursos publicados, detalhe do curso, player de
   aula (embed `youtube-nocookie`) e marcação de aula concluída.
 - Inscrição automática ao começar/concluir uma aula e progresso por aula.
-- Materiais/anexos: modelos prontos; UI e upload no Supabase ainda pendentes.
+- **Anexos por aula** e **biblioteca de materiais** (`/admin/materiais` e
+  `/materiais`), com publicação e exclusão.
+- **Arquivos:** URL externa por padrão; com Supabase Storage configurado,
+  upload no servidor e geração de URL assinada na leitura.
 
 ---
 
@@ -401,8 +404,9 @@ Avaliação via job após eventos relevantes; grava `UserBadge` (único).
 - [x] Vídeo via **embed do YouTube não listado** (`youtube-nocookie`),
   guardando `videoProvider` + `videoId` para migrar ao Bunny sem migrar dados.
 - [x] Catálogo público, detalhe do curso, player e marcação de progresso.
-- [ ] Upload de PDF/ebook/imagem no Supabase Storage (URL assinada).
-- [ ] Telas de anexos por aula e da biblioteca de materiais.
+- [x] Upload no Supabase Storage (URL assinada) quando configurado; fallback
+  para URL externa.
+- [x] Telas de anexos por aula e da biblioteca de materiais.
 - [ ] Edição de aulas e reordenação de módulos/aulas.
 
 ### Fase 2 — Gamificação
