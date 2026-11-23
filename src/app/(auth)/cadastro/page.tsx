@@ -35,7 +35,7 @@ export default function SignupPage() {
 
     setPending(true);
 
-    const { error: authError } = await signUp.email({
+    const { data, error: authError } = await signUp.email({
       name: parsed.data.name,
       email: parsed.data.email,
       password: parsed.data.password,
@@ -49,6 +49,13 @@ export default function SignupPage() {
       } else {
         setError("Não foi possível criar a conta. Tente novamente.");
       }
+      return;
+    }
+
+    // Quando a verificação de e-mail está desativada (dev), já existe sessão.
+    if (data && "token" in data && data.token) {
+      router.push("/perfil");
+      router.refresh();
       return;
     }
 

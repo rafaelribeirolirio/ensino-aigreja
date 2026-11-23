@@ -12,7 +12,10 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
+    // Padrão seguro: exige verificação. Em dev, defina
+    // REQUIRE_EMAIL_VERIFICATION="false" para entrar sem clicar no link.
+    requireEmailVerification:
+      process.env.REQUIRE_EMAIL_VERIFICATION !== "false",
     minPasswordLength: 8,
   },
   emailVerification: {

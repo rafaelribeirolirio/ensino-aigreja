@@ -68,9 +68,16 @@ Abra <http://localhost:3000>.
 ## Autenticação
 
 - Cadastro em `/cadastro`, login em `/login`, perfil em `/perfil`.
-- A verificação de e-mail é **obrigatória** antes do primeiro login.
-- Sem `RESEND_API_KEY`, o link de verificação é impresso no console do
-  servidor (útil no desenvolvimento).
+- **Produção:** verificação de e-mail obrigatória
+  (`REQUIRE_EMAIL_VERIFICATION="true"`).
+- **Desenvolvimento:** o `.env` local usa `REQUIRE_EMAIL_VERIFICATION="false"`,
+  então você cria a conta e já entra direto, sem clicar em link.
+- Se quiser testar a verificação em dev, mude para `"true"`. Sem
+  `RESEND_API_KEY`, o link é impresso no **terminal onde roda `npm run dev`**
+  (o mesmo que mostra `Local: http://localhost:3000`), na linha
+  `[auth] Link de verificação...`.
+- Para enviar e-mail de verdade, configure o Resend (`RESEND_API_KEY` e
+  `EMAIL_FROM` com domínio verificado).
 - `/perfil` é protegido no `src/proxy.ts` (checagem otimista do cookie) e no
   DAL do servidor (`src/lib/session.ts`), que é a checagem segura.
 
