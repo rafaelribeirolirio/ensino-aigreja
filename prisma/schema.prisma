@@ -1,0 +1,340 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Better Auth (core schema)
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String   @id
+  name          String
+  email         String
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Domínio da plataforma
+  churchRole ChurchRole @default(MEMBER)
+  bio        String?
+
+  sessions Session[]
+  accounts Account[]
+
+  enrollments Enrollment[]
+  progress    LessonProgress[]
+  posts       ForumPost[]
+  threads     ForumThread[]
+  points      PointTransaction[]
+  badges      UserBadge[]
+
+  // Autoria de conteúdo (controle de permissão/auditoria)
+  coursesCreated    Course[]        @relation("CourseAuthor")
+  lessonsCreated    Lesson[]        @relation("LessonAuthor")
+  materialsCreated  Material[]      @relation("MaterialAuthor")
+  categoriesCreated ForumCategory[] @relation("CategoryAuthor")
+  badgesCreated     Badge[]         @relation("BadgeAuthor")
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+// ---------------------------------------------------------------------------
+// Domínio: cursos e conteúdo
+// ---------------------------------------------------------------------------
+
+enum ChurchRole {
+  MEMBER
+  TEACHER
+  LEADER
+  ADMIN
+}
+
+enum LessonType {
+  VIDEO
+  PDF
+  EBOOK
+  TEXT
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  coverUrl    String?
+  published   Boolean  @default(false)
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy   User         @relation("CourseAuthor", fields: [createdById], references: [id])
+  modules     Module[]
+  enrollments Enrollment[]
+
+  @@index([createdById])
+}
+
+model Module {
+  id       String @id @default(cuid())
+  courseId String
+  title    String
+  order    Int    @default(0)
+
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+
+  @@index([courseId])
+}
+
+model Lesson {
+  id            String     @id @default(cuid())
+  moduleId      String
+  title         String
+  type          LessonType
+  videoProvider String? // "youtube" (MVP) | "bunny" (futuro)
+  videoId       String? // id do vídeo no provider
+  filePath      String? // chave no Supabase Storage (PDF/ebook principal)
+  textContent   String?
+  durationMin   Int?
+  order         Int        @default(0)
+  createdById   String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  module      Module             @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  createdBy   User               @relation("LessonAuthor", fields: [createdById], references: [id])
+  progress    LessonProgress[]
+  attachments LessonAttachment[]
+
+  @@index([moduleId])
+  @@index([createdById])
+}
+
+// Vários anexos por aula (PDFs, ebooks, links, etc.)
+model LessonAttachment {
+  id        String   @id @default(cuid())
+  lessonId  String
+  title     String
+  filePath  String
+  mimeType  String?
+  sizeBytes Int?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId])
+}
+
+// Biblioteca de materiais independentes (não presos a uma aula)
+model Material {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  filePath    String
+  mimeType    String?
+  sizeBytes   Int?
+  category    String?
+  published   Boolean  @default(false)
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy User @relation("MaterialAuthor", fields: [createdById], references: [id])
+
+  @@index([createdById])
+  @@index([createdAt])
+}
+
+model Enrollment {
+  id          String    @id @default(cuid())
+  userId      String
+  courseId    String
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([courseId])
+}
+
+model LessonProgress {
+  id          String    @id @default(cuid())
+  userId      String
+  lessonId    String
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@index([lessonId])
+}
+
+// ---------------------------------------------------------------------------
+// Gamificação
+// ---------------------------------------------------------------------------
+
+model Badge {
+  id          String  @id @default(cuid())
+  key         String  @unique
+  name        String
+  description String
+  iconUrl     String?
+  rule        Json
+  createdById String
+
+  createdBy User        @relation("BadgeAuthor", fields: [createdById], references: [id])
+  rewards   UserBadge[]
+
+  @@index([createdById])
+}
+
+model UserBadge {
+  id       String   @id @default(cuid())
+  userId   String
+  badgeId  String
+  earnedAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@index([badgeId])
+}
+
+model PointTransaction {
+  id        String   @id @default(cuid())
+  userId    String
+  amount    Int // positivo = ganho, negativo = resgate
+  reason    String // LESSON_DONE, COURSE_DONE, POST, ...
+  refId     String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Fórum
+// ---------------------------------------------------------------------------
+
+model ForumCategory {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  description String?
+  order       Int     @default(0)
+  createdById String
+
+  createdBy User          @relation("CategoryAuthor", fields: [createdById], references: [id])
+  threads   ForumThread[]
+
+  @@index([createdById])
+}
+
+model ForumThread {
+  id         String   @id @default(cuid())
+  categoryId String
+  authorId   String
+  title      String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  pinned     Boolean  @default(false)
+  locked     Boolean  @default(false)
+
+  category ForumCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  author   User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  posts    ForumPost[]
+
+  @@index([categoryId, updatedAt])
+  @@index([authorId])
+}
+
+model ForumPost {
+  id        String   @id @default(cuid())
+  threadId  String
+  authorId  String
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  hidden    Boolean  @default(false)
+
+  thread    ForumThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  author    User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  reactions Reaction[]
+
+  @@index([threadId, createdAt])
+  @@index([authorId])
+}
+
+model Reaction {
+  id     String @id @default(cuid())
+  postId String
+  userId String
+  type   String @default("like")
+
+  post ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId, type])
+  @@index([postId])
+}
