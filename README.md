@@ -74,6 +74,13 @@ Abra <http://localhost:3000>.
 - `/perfil` é protegido no `src/proxy.ts` (checagem otimista do cookie) e no
   DAL do servidor (`src/lib/session.ts`), que é a checagem segura.
 
+### Primeiro administrador (desenvolvimento)
+
+1. Crie uma conta em `/cadastro` e confirme o e-mail (o link aparece no console).
+2. Rode `npm run db:studio`.
+3. Na tabela `User`, altere `churchRole` para `ADMIN` (ou `TEACHER`).
+4. Acesse `/admin`.
+
 ## Conteúdo, anexos e materiais
 
 - **Cursos/aulas:** administração em `/admin` (cargos `TEACHER` e `ADMIN`).
