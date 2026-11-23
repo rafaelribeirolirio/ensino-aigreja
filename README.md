@@ -91,10 +91,15 @@ Abra <http://localhost:3000>.
 
 ### Primeiro administrador (desenvolvimento)
 
-1. Crie uma conta em `/cadastro` e confirme o e-mail (o link aparece no console).
-2. Rode `npm run db:studio`.
-3. Na tabela `User`, altere `churchRole` para `ADMIN` (ou `TEACHER`).
-4. Acesse `/admin`.
+1. Crie uma conta em `/cadastro` (em dev você já entra sem confirmar e-mail).
+2. Com o banco rodando (`npm run db:dev`), torne sua conta admin:
+   - **CLI (recomendado):**
+     ```bash
+     npm run db:set-role -- seu@email.com ADMIN
+     ```
+   - **Interface:** `npm run db:studio` → tabela `User` → coluna
+     `churchRole` → `ADMIN` → **Save**.
+3. Saia e entre de novo no site e acesse `/admin`.
 
 ## Conteúdo, anexos e materiais
 
@@ -123,6 +128,7 @@ Abra <http://localhost:3000>.
 | `npm run db:deploy` | Aplica migrações (produção) |
 | `npm run db:generate` | Gera o Prisma Client |
 | `npm run db:studio` | Prisma Studio |
+| `npm run db:set-role -- email CARGO` | Define o cargo de um usuário |
 
 ## Estrutura
 
