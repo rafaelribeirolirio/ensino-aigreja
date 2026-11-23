@@ -39,12 +39,20 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
 npm run db:dev
 ```
 
-Copie a `DATABASE_URL` impressa no terminal para o `.env` (o valor padrão do
-`.env.example` já aponta para `localhost:51218`). Em outro terminal:
+O script `db:dev` sobe o servidor `celulas-aig` na **porta fixa 51218**, que é a
+mesma do `.env`. **Mantenha esse terminal aberto** enquanto estiver
+desenvolvendo. Em outro terminal:
 
 ```bash
 npm run db:push
 ```
+
+> Se aparecer `P1001: Can't reach database server at localhost:51218` ou
+> “Could not load schema metadata” no Studio, o banco não está rodando:
+> - confirme que o terminal do `npm run db:dev` está aberto;
+> - se ele subiu em outra porta, rode `npx prisma dev stop celulas-aig` e
+>   inicie de novo com `npm run db:dev`;
+> - se as tabelas não existirem, rode `npm run db:push`.
 
 > O servidor local do Prisma não suporta shadow database do jeito que o
 > `prisma migrate dev` espera, então no dia a dia usamos `db:push`. Os arquivos
